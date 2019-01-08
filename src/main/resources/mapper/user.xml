@@ -3,22 +3,47 @@
 <mapper namespace="com.haoli.personalSite.dao.UserDao">
 
   	<sql id="CommonQuery">
-  		<!-- 精准查询 -->
-        <if test="conferenceId != null ">
-            and conferenceId=#{conferenceId}
+        <if test="id != null ">
+            and id=#{id}
         </if>
-        <!-- 模糊查询 -->
-		<if test="value != null and value != '' ">
-			and value like '%${value}%'
+		<if test="userName != null and userName != '' ">
+			and userName like '%${userName}%'
 		</if>
 		<!-- 按时间段查询 -->
 		<if test="startDate != null and startDate != '' ">
-            and startDate <![CDATA[>]]> #{orderDate}
+            and startDate <![CDATA[>]]> #{createTime}
         </if>
         <if test="endDate != null and endDate != '' ">
-            and endDate <![CDATA[<]]> #{orderDate}
+            and endDate <![CDATA[<]]> #{createTime}
         </if>
     </sql>
+
+	<select id="queryUser" parameterType="java.util.Map" resultType="com.haoli.personalSite.domain.User">
+		select * from
+			t_user
+		<where>
+			<include refid="CommonQuery"/>
+		</where>
+	</select>
+	
+	<insert id="add" parameterType="com.haoli.personalSite.domain.User">
+		insert into
+			t_user(
+				userName,
+				password,
+				salt,
+				phone,
+				email,
+				createTime
+			)values(
+				#{userName},
+				#{password},
+				#{salt},
+				#{phone},
+				#{email},
+				#{createTime}
+			)
+	</insert>
 
     <insert id="batchAdd" parameterType="java.util.Map">
 		insert into 

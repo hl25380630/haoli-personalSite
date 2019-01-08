@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.haoli.personalSite.dao.UserDao;
 import com.haoli.personalSite.domain.User;
+import com.haoli.sdk.web.domain.RSAKey;
 import com.haoli.sdk.web.exception.ConditionException;
 import com.haoli.sdk.web.util.Md5Util;
 import com.haoli.sdk.web.util.RsaUtil;
@@ -17,8 +17,8 @@ import com.haoli.sdk.web.util.RsaUtil;
 @Service
 public class UserService {
 	
-	@Value("${rsa.privateKey}")
-	private String rsaPrivateKey;
+	@Autowired
+	RSAKey rasKeySet;
 	
 	@Autowired
 	UserDao userDao;
@@ -31,11 +31,14 @@ public class UserService {
 		if(record != null) {
 			throw new ConditionException("用户已存在");
 		}
-		String pwd = RsaUtil.decrypt(user.getPassword(), rsaPrivateKey);
+		String privateKey = rasKeySet.getPrivateKeyString();
+		String pwd = RsaUtil.decrypt(user.getPassword(),privateKey);
 		String salt = System.currentTimeMillis() + userName;
 		user.setSalt(salt);
 		String pwdMd5 = Md5Util.sign(pwd, salt, "UTF-8");
 		user.setPassword(pwdMd5);
+		user.setPhone("");
+		user.setEmail("");
 		user.setCreateTime(new Date());
 		userDao.add(user);
 	}
